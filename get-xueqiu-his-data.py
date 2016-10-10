@@ -2,6 +2,8 @@
 import time
 import tushare as ts
 from urllib import request
+import pandas as pd
+import io
 
 hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '
        + 'AppleWebKit/537.11 (KHTML, like Gecko) '
@@ -14,13 +16,25 @@ hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '
        'Connection': 'keep-alive'}
 
 
-def get_history_data(code, start_dt, end_dt):
+def get_history_data(code):
     url = "http://xueqiu.com/S/" + code + "/historical.csv"
     req = request.Request(url, headers=hdr)
     page = request.urlopen(req)
     content = page.read()
-    
+    df = pd.read_csv(io.BytesIO(content), encoding='utf-8', parse_dates=[1])
+    return df
+
+
+def get_data_by_date(df, dt):
+    return df[df.date == dt]
+
+
+def calc_row_data(df):
+    df['diff-price'] = df['open'] - df['close']
+    df['diff-price-rate'] = df['diff-price'] / df['open']
+    df['max-diff-price'] = df['high'] - df['low']
+    return df
 
 
 if __name__ == '__main__':
-    get_history_data("CHAD", "2016-10-01", "2016-10-10")
+    get_history_data("CHAD")
