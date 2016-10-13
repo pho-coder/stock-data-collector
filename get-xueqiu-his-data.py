@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import time
-import tushare as ts
 from urllib import request
 import pandas as pd
 import io
@@ -26,15 +24,48 @@ def get_history_data(code):
 
 
 def get_data_by_date(df, dt):
-    return df[df.date == dt]
+    return df.assign(date=dt)
 
 
-def calc_row_data(df):
-    df['diff-price'] = df['open'] - df['close']
-    df['diff-price-rate'] = df['diff-price'] / df['open']
-    df['max-diff-price'] = df['high'] - df['low']
+def calc_row_data(tag, df):
+    df[tag + '-diff-price'] = df['open'] - df['close']
+    df[tag + '-diff-price-rate'] = df[tag + '-diff-price'] / df['open']
+    df[tag + '-max-diff-price'] = df['high'] - df['low']
+    df.rename(columns={'open': tag + '-open',
+                       'high': tag + '-high',
+                       'low': tag + '-low',
+                       'close': tag + '-close',
+                       'volume': tag + '-volume'},
+              inplace=True)
     return df
 
 
+def up_up_down_down(diff_price1, diff_price2):
+    if diff_price1 > 0 and diff_price2 > 0:
+        return True
+    elif diff_price1 < 0 and diff_price2 < 0:
+        return True
+    else:
+        return False
+
+
+def judge_rules(tag1, tag2, df):
+    df['right'] = up_up_down_down(df[tag1 + '-diff-price'],
+                                  df[tag2 + '-diff-price'])
+    return df
+
+
+def test():
+    hs300 = get_history_data('SH000300')
+    chau = get_history_data('CHAU')
+    calc_row_data('SH000300', hs300)
+    calc_row_data('CHAU', chau)
+    merge_data = pd.merge(hs300, chau, on='date')
+    merge_data['right'].apply()
+    for i, row in merge_data.iterrows():
+        if row['date'] >= pd.tslib.Timestamp("2016-10-01"):
+            print(row)
+
+
 if __name__ == '__main__':
-    get_history_data("CHAD")
+    get_history_data("SH000300")
