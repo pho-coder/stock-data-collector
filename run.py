@@ -7,21 +7,21 @@ def deal_data(today_data):
     data = today_data.iloc[0]
     tag = data[0]
     date = data['date'].strftime('%Y-%m-%d')
-    open = data['open']
+    open_price = data['open']
     high = data['high']
     low = data['low']
     close = data['close']
     volume = data['volume']
     title_str = 'tag,date,open,high,low,close,volume'
-    with open("data", 'w') as f:
+    with open('data.' + date, 'w') as f:
         f.write(title_str+'\n')
         f.write(tag + ',' +
                 date + ',' +
-                open + ',' +
-                high + ',' +
-                low + ',' +
-                close + ',' +
-                volume + '\n')
+                str(open_price) + ',' +
+                str(high) + ',' +
+                str(low) + ',' +
+                str(close) + ',' +
+                str(volume) + '\n')
 
 
 if __name__ == '__main__':
@@ -34,6 +34,7 @@ if __name__ == '__main__':
         df = utils.get_history_data(tag1)
         dt = df[-1:].iloc[0]['date'].strftime('%Y-%m-%d')
         if dt != today:
+            print('sleep')
             time.sleep(60)
             continue
         else:
