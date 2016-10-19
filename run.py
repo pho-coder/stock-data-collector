@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import utils
 import time
+import os
+
+print(os.getcwd())
 
 
 def deal_data(today_data):
@@ -13,7 +16,7 @@ def deal_data(today_data):
     close = data['close']
     volume = data['volume']
     title_str = 'tag,date,open,high,low,close,volume'
-    with open('data.' + date, 'w') as f:
+    with open(os.getcwd() + '/data.' + date, 'w') as f:
         f.write(title_str+'\n')
         f.write(tag + ',' +
                 date + ',' +
