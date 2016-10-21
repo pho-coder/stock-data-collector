@@ -30,8 +30,7 @@ def deal_data(today_data):
 if __name__ == '__main__':
     tag1 = 'SH000300'
     tag2 = 'CHAU'
- #   today = time.strftime('%Y-%m-%d', time.localtime())
-    today = '2016-10-20'
+    today = time.strftime('%Y-%m-%d', time.localtime())
     while True:
         if int(time.strftime('%H', time.localtime())) > 20:
             break
