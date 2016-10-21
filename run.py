@@ -3,7 +3,7 @@ import utils
 import time
 import os
 
-print(os.getcwd())
+print(os.getenv('DATA_PATH'))
 
 
 def deal_data(today_data):
@@ -16,7 +16,7 @@ def deal_data(today_data):
     close = data['close']
     volume = data['volume']
     title_str = 'tag,date,open,high,low,close,volume'
-    with open(os.getcwd() + '/data.' + date, 'w') as f:
+    with open(os.getenv('DATA_PATH') + '/data.' + date, 'w') as f:
         f.write(title_str+'\n')
         f.write(tag + ',' +
                 date + ',' +
