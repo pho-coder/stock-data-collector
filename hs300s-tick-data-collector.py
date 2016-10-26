@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import sys
+import os
 import time
+import shutil
 import tushare as ts
+# from sqlalchemy import create_engine
 
 
 def get_hs300s_code():
@@ -16,10 +19,20 @@ def save_hs300s_tick_to_csv(path, dt):
     for one_code in get_hs300s_code():
         print(time.strftime("%Y-%m-%d %H:%M:%S"))
         print(one_code)
-        get_one_stock_tick(one_code, dt).to_csv(path)
+        get_one_stock_tick(one_code, dt).to_csv(path + '/' +
+                                                one_code + '.csv',
+                                                index=False)
+
+
+def save_hs300s_tick_to_mysql(tb, eg, dt):
+    for one_code in get_hs300s_code():
+        print(time.strftime("%Y-%m-%d %H:%M:%S"))
+        print(one_code)
+        get_one_stock_tick(one_code, dt).to_sql(tb, eg, if_exists='append')
+
 
 if __name__ == '__main__':
-    # argv = sys.argv
+    argv = sys.argv
     # if len(argv) < 6:
     #     print("argv error!")
     #     sys.exit(1)
@@ -28,4 +41,20 @@ if __name__ == '__main__':
     # ip = argv[3]
     # db = argv[4]
     # date = argv[5]
-    save_hs300s_tick_to_csv("./a.csv", "2016-09-30")
+    # table = 'tick_data'
+    # engine = create_engine('mysql+pymysql://' + user + ':' +
+    #                        password + '@' + ip + '/' + db + '?charset=utf8')
+    # save_hs300s_tick_to_mysql(table, engine, date)
+    path = argv[1]
+    dt = argv[2]  # 2016-10-26
+    if not os.path.exists(path):
+        print(path + ' NOT exists!')
+        sys.exit(1)
+    today_path = path + '/' + dt
+    if os.path.exists(today_path):
+        print('rm ' + today_path)
+        shutil.rmtree(today_path)
+        os.mkdir(today_path)
+    else:
+        os.mkdir(today_path)
+    save_hs300s_tick_to_csv(today_path, dt)
