@@ -16,13 +16,17 @@ def get_one_stock_tick(cd, dt):
 
 
 def save_hs300s_tick_to_csv(path, dt):
+    list = open(path + '/list', 'w')
     for one_code in get_hs300s_code():
         print(time.strftime("%Y-%m-%d %H:%M:%S"))
         print(one_code)
-        get_one_stock_tick(one_code, dt).to_csv(path + '/' +
-                                                one_code + '.csv',
-                                                index=False)
-
+        data = get_one_stock_tick(one_code, dt)
+        if not data.iloc[0][0] == 'alert("当天没有数据");':
+            list.write(one_code + '\n')
+            data.to_csv(path + '/' +
+                        one_code + '.csv',
+                        index=False)
+    list.close()
 
 def save_hs300s_tick_to_mysql(tb, eg, dt):
     for one_code in get_hs300s_code():
