@@ -91,3 +91,4 @@ ENV/
 *.csv
 data.*
 data
+run.sh
