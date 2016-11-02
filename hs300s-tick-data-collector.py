@@ -27,6 +27,9 @@ def save_hs300s_tick_to_csv(path, dt):
                         one_code + '.csv',
                         index=False)
     list.close()
+    finish = open(path + '/finish', 'w')
+    finish.close()
+
 
 def save_hs300s_tick_to_mysql(tb, eg, dt):
     for one_code in get_hs300s_code():
