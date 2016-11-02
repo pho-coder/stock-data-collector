@@ -50,7 +50,7 @@ if __name__ == '__main__':
     #                        password + '@' + ip + '/' + db + '?charset=utf8')
     # save_hs300s_tick_to_mysql(table, engine, date)
     path = argv[1] if len(argv) >= 2 else './data'
-    dt = argv[2] if len(argv) >= 3else time.strftime('%Y-%m-%d')
+    dt = argv[2] if len(argv) >= 3 else time.strftime('%Y-%m-%d')
     if not os.path.exists(path):
         print(path + ' NOT exists!')
         sys.exit(1)
