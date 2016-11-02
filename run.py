@@ -16,7 +16,7 @@ def deal_data(today_data):
     close = data['close']
     volume = data['volume']
     title_str = 'tag,date,open,high,low,close,volume'
-    with open(os.getenv('DATA_PATH') + '/data.' + date, 'w') as f:
+    with open(os.getenv('DATA_PATH') + '/' + date + '/' + tag, 'w') as f:
         f.write(title_str+'\n')
         f.write(tag + ',' +
                 date + ',' +
@@ -42,5 +42,5 @@ if __name__ == '__main__':
             continue
         else:
             today_data = df[-1:]
-            deal_data(today_data)
+            deal_data(today_data, today)
             break
