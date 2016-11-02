@@ -42,5 +42,5 @@ if __name__ == '__main__':
             continue
         else:
             today_data = df[-1:]
-            deal_data(today_data, today)
+            deal_data(today_data)
             break
