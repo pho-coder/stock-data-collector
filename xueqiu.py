@@ -16,7 +16,7 @@ def deal_data(today_data):
     close = data['close']
     volume = data['volume']
     title_str = 'tag,date,open,high,low,close,volume'
-    with open(os.getenv('DATA_PATH') + '/' + date + '/' + tag, 'w') as f:
+    with open(os.getenv('DATA_PATH') + '/' + tag + '.' + date, 'w') as f:
         f.write(title_str+'\n')
         f.write(tag + ',' +
                 date + ',' +
