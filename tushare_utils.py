@@ -12,7 +12,10 @@ def get_hs300s_code():
 
 
 def get_one_stock_tick(cd, dt):
-    return ts.get_tick_data(cd, date=dt, retry_count=600, pause=1).assign(code=cd).assign(date=dt)
+    return ts.get_tick_data(cd,
+                            date=dt,
+                            retry_count=600,
+                            pause=0.1).assign(code=cd).assign(date=dt)
 
 
 def save_hs300s_tick_to_csv(path, dt):
@@ -28,8 +31,10 @@ def save_hs300s_tick_to_csv(path, dt):
                         one_code + '.csv',
                         index=False)
     list.close()
-    finish = open(path + '/finish', 'w')
-    finish.close()
+    with open(path + '/list', 'r') as f:
+        if f.readline() != '':
+            finish = open(path + '/finish', 'w')
+            finish.close()
 
 
 def save_hs300s_tick_to_mysql(tb, eg, dt):
@@ -69,9 +74,8 @@ if __name__ == '__main__':
         else:
             os.mkdir(today_path)
         save_hs300s_tick_to_csv(today_path, dt)
-        with open(today_path + '/list', 'r') as f:
-            if f.readline() != '':
-                break
-            else:
-                print('list is empty now')
-                time.sleep(60)
+        if os.path.isfile(today_path + '/finish'):
+            break
+        else:
+            print('NO finish')
+            time.sleep(60)
