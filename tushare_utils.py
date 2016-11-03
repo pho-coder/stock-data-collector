@@ -12,7 +12,7 @@ def get_hs300s_code():
 
 
 def get_one_stock_tick(cd, dt):
-    return ts.get_tick_data(cd, date=dt).assign(code=cd).assign(date=dt)
+    return ts.get_tick_data(cd, date=dt, retry_count=600, pause=1).assign(code=cd).assign(date=dt)
 
 
 def save_hs300s_tick_to_csv(path, dt):
