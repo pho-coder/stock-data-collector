@@ -23,6 +23,7 @@ def save_hs300s_tick_to_csv(path, dt):
         data = get_one_stock_tick(one_code, dt)
         if not data.iloc[0][0] == 'alert("当天没有数据");':
             list.write(one_code + '\n')
+            list.flush()
             data.to_csv(path + '/' +
                         one_code + '.csv',
                         index=False)
