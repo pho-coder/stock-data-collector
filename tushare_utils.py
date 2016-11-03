@@ -58,10 +58,19 @@ if __name__ == '__main__':
         print(path + ' NOT exists!')
         sys.exit(1)
     today_path = path + '/' + dt
-    if os.path.exists(today_path):
-        print('rm ' + today_path)
-        shutil.rmtree(today_path)
-        os.mkdir(today_path)
-    else:
-        os.mkdir(today_path)
-    save_hs300s_tick_to_csv(today_path, dt)
+    while True:
+        if int(time.strftime('%H', time.localtime())) > 20:
+            break
+        if os.path.exists(today_path):
+            print('rm ' + today_path)
+            shutil.rmtree(today_path)
+            os.mkdir(today_path)
+        else:
+            os.mkdir(today_path)
+            save_hs300s_tick_to_csv(today_path, dt)
+        with open(today_path + '/list', 'r') as f:
+            if f.readline() != '':
+                break
+            else:
+                print('list is empty now')
+                time.sleep(60)

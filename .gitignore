@@ -92,3 +92,5 @@ ENV/
 data.*
 data
 *.sh
+
+logs/
