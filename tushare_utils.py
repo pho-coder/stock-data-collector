@@ -67,7 +67,7 @@ if __name__ == '__main__':
             os.mkdir(today_path)
         else:
             os.mkdir(today_path)
-            save_hs300s_tick_to_csv(today_path, dt)
+        save_hs300s_tick_to_csv(today_path, dt)
         with open(today_path + '/list', 'r') as f:
             if f.readline() != '':
                 break
