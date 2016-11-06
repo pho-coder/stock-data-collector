@@ -18,6 +18,10 @@ def get_one_stock_tick(cd, dt):
                             pause=0.1).assign(code=cd).assign(date=dt)
 
 
+def get_hs300_history_data(start_dt, end_dt):
+    ts.get_hist_data('hs300', start=start_dt, end=end_dt)
+
+
 def save_hs300s_tick_to_csv(path, dt):
     list = open(path + '/list', 'w')
     for one_code in get_hs300s_code():
