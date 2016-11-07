@@ -22,6 +22,12 @@ def get_hs300_history_data(start_dt, end_dt):
     ts.get_hist_data('hs300', start=start_dt, end=end_dt)
 
 
+def save_hs300s_to_csv(path, dt):
+    df = ts.get_hist_data('hs300', start=dt, end=dt)
+    if not df.empty:
+        df.to_csv(path)
+
+
 def save_hs300s_tick_to_csv(path, dt):
     list = open(path + '/list', 'w')
     for one_code in get_hs300s_code():
@@ -50,27 +56,19 @@ def save_hs300s_tick_to_mysql(tb, eg, dt):
 
 if __name__ == '__main__':
     argv = sys.argv
-    # if len(argv) < 6:
-    #     print("argv error!")
-    #     sys.exit(1)
-    # user = argv[1]
-    # password = argv[2]
-    # ip = argv[3]
-    # db = argv[4]
-    # date = argv[5]
-    # table = 'tick_data'
-    # engine = create_engine('mysql+pymysql://' + user + ':' +
-    #                        password + '@' + ip + '/' + db + '?charset=utf8')
-    # save_hs300s_tick_to_mysql(table, engine, date)
     path = argv[1] if len(argv) >= 2 else './data'
     dt = argv[2] if len(argv) >= 3 else time.strftime('%Y-%m-%d')
     if not os.path.exists(path):
         print(path + ' NOT exists!')
         sys.exit(1)
     today_path = path + '/' + dt
+    today_hs300 = path + '/SH000300.' + dt
     while True:
         if int(time.strftime('%H', time.localtime())) > 20:
             break
+        if not os.path.exists(today_hs300):
+            print('download hs300')
+            save_hs300s_to_csv(today_hs300, dt)
         if os.path.exists(today_path):
             print('rm ' + today_path)
             shutil.rmtree(today_path)
