@@ -91,6 +91,7 @@ ENV/
 *.csv
 data.*
 data
+summary
 *.sh
 
 logs/
