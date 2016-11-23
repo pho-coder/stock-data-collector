@@ -4,11 +4,20 @@ import os
 import time
 import shutil
 import tushare as ts
+import pandas as pd
+import numpy as np
 # from sqlalchemy import create_engine
 
 
 def get_hs300s_code():
     return ts.get_hs300s().code
+
+
+def read_hs300s(file):
+    return pd.read_csv(file, dtype={'code': np.str,
+                                    'name': np.str,
+                                    'date': np.str,
+                                    'weight': np.str})
 
 
 def get_one_stock_tick(cd, dt):
@@ -30,8 +39,8 @@ def save_hs300s_to_csv(path, dt):
 
 def save_hs300s_tick_to_csv(path, dt):
     list = open(path + '/list', 'w')
-    hs300s = ts.get_hs300s()
-    for one_code in get_hs300s_code():
+    hs300s = read_hs300s(path + '/../hs300s.csv')
+    for one_code in hs300s.code:
         print(time.strftime("%Y-%m-%d %H:%M:%S"))
         print(one_code)
         data = get_one_stock_tick(one_code, dt)
