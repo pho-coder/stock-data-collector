@@ -35,7 +35,7 @@ def save_hs300s_tick_to_csv(path, dt):
         print(time.strftime("%Y-%m-%d %H:%M:%S"))
         print(one_code)
         data = get_one_stock_tick(one_code, dt)
-        if not data.iloc[0][0] == 'alert("当天没有数据");':
+        if not data.empty and not data.iloc[0][0] == 'alert("当天没有数据");':
             info = hs300s[hs300s.code == one_code]
             if info.empty:
                 list.write(one_code + '\n')
