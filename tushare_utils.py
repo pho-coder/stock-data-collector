@@ -56,6 +56,9 @@ def save_hs300s_tick_to_csv(path, dt):
             data.to_csv(path + '/' +
                         one_code + '.csv',
                         index=False)
+        else:
+            print('NO DATA')
+            print(data)
     list.close()
     with open(path + '/list', 'r') as f:
         if f.readline() != '':
