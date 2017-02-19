@@ -7,4 +7,6 @@ DATA_PATH=$1
 echo $DATA_PATH
 DT=$2
 echo $DT
-python3 sdc.py $DATA_PATH $DT
+MANUAL=$3
+echo $MANUAL
+python3 $SDC_HOME/sdc.py $DATA_PATH $DT $MANUAL
