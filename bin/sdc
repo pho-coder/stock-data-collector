@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+bin=`dirname $0`
+bin=`cd "$bin"; pwd`
+SDC_HOME=`cd "$bin"/..;pwd`
+echo $SDC_HOME
+DATA_PATH=$1
+echo $DATA_PATH
+DT=$2
+echo $DT
+python3 sdc.py $DATA_PATH $DT

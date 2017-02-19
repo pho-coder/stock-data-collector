@@ -1,40 +1,109 @@
 #!/usr/bin/env python3
-from urllib import request
+import sys
+import os
+import time
+import shutil
+import tushare as ts
 import pandas as pd
-import io
-
-hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '
-       + 'AppleWebKit/537.11 (KHTML, like Gecko) '
-       + 'Chrome/23.0.1271.64 Safari/537.11',
-       'Accept': 'text/html,application/xhtml+xml,'
-       + 'application/xml;q=0.9,*/*;q=0.8',
-       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-       'Accept-Encoding': 'none',
-       'Accept-Language': 'en-US,en;q=0.8',
-       'Connection': 'keep-alive'}
+import numpy as np
+# from sqlalchemy import create_engine
 
 
-def get_history_data(code):
-    url = "http://xueqiu.com/S/" + code + "/historical.csv"
-    req = request.Request(url, headers=hdr)
-    page = request.urlopen(req)
-    content = page.read()
-    df = pd.read_csv(io.BytesIO(content), encoding='utf-8', parse_dates=[1])
-    return df
+def get_hs300s_code():
+    return ts.get_hs300s().code
 
 
-def get_data_by_date(df, dt):
-    return df.assign(date=dt)
+def read_hs300s(file):
+    return pd.read_csv(file, dtype={'code': np.str,
+                                    'name': np.str,
+                                    'date': np.str,
+                                    'weight': np.str})
 
 
-def calc_row_data(tag, df):
-    df[tag + '-diff-price'] = df['close'] - df['open']
-    df[tag + '-diff-price-rate'] = df[tag + '-diff-price'] / df['open']
-    df[tag + '-max-diff-price'] = df['high'] - df['low']
-    df.rename(columns={'open': tag + '-open',
-                       'high': tag + '-high',
-                       'low': tag + '-low',
-                       'close': tag + '-close',
-                       'volume': tag + '-volume'},
-              inplace=True)
-    return df
+def get_one_stock_tick(cd, dt):
+    return ts.get_tick_data(cd,
+                            date=dt,
+                            retry_count=600,
+                            pause=0.1).assign(code=cd).assign(date=dt)
+
+
+def get_hs300_history_data(start_dt, end_dt):
+    ts.get_hist_data('hs300', start=start_dt, end=end_dt)
+
+
+def save_hs300s_to_csv(path, dt):
+    df = ts.get_hist_data('hs300', start=dt, end=dt)
+    if not df.empty:
+        df.to_csv(path)
+
+
+def save_hs300s_tick_to_csv(path, dt):
+    list = open(path + '/list', 'w')
+    hs300s = read_hs300s(path + '/../hs300s.csv')
+    for one_code in hs300s.code:
+        print(time.strftime("%Y-%m-%d %H:%M:%S"))
+        print(one_code)
+        data = get_one_stock_tick(one_code, dt)
+        if not data.empty and not data.iloc[0][0] == 'alert("当天没有数据");':
+            info = hs300s[hs300s.code == one_code]
+            if info.empty:
+                list.write(one_code + '\n')
+            else:
+                list.write(one_code + ',' +
+                           str(info.iloc[0]['weight']) + ',' +
+                           str(info.iloc[0]['name']) + '\n')
+            list.flush()
+            data.to_csv(path + '/' +
+                        one_code + '.csv',
+                        index=False)
+        else:
+            print('NO DATA')
+            print(data)
+    list.close()
+    with open(path + '/list', 'r') as f:
+        if f.readline() != '':
+            finish = open(path + '/finish', 'w')
+            finish.close()
+
+
+def save_hs300s_tick_to_mysql(tb, eg, dt):
+    for one_code in get_hs300s_code():
+        print(time.strftime("%Y-%m-%d %H:%M:%S"))
+        print(one_code)
+        get_one_stock_tick(one_code, dt).to_sql(tb, eg, if_exists='append')
+
+
+if __name__ == '__main__':
+    argv = sys.argv
+    path = argv[1] if len(argv) >= 2 else './data'
+    dt = argv[2] if len(argv) >= 3 else time.strftime('%Y-%m-%d')
+    manual = True if len(argv) >= 4 else False
+    download_hs300_only = True if len(argv) >= 5 else False
+    if not os.path.exists(path):
+        print(path + ' NOT exists!')
+        sys.exit(1)
+    today_path = path + '/' + dt
+    today_hs300 = path + '/SH000300.' + dt
+    while True:
+        if not manual:
+            if int(time.strftime('%H', time.localtime())) > 20:
+                break
+        if not os.path.exists(today_hs300):
+            print('download hs300')
+            save_hs300s_to_csv(today_hs300, dt)
+            if download_hs300_only:
+                break
+        if os.path.exists(today_hs300) and download_hs300_only:
+            break
+        if os.path.exists(today_path):
+            print('rm ' + today_path)
+            shutil.rmtree(today_path)
+            os.mkdir(today_path)
+        else:
+            os.mkdir(today_path)
+        save_hs300s_tick_to_csv(today_path, dt)
+        if os.path.isfile(today_path + '/finish'):
+            break
+        else:
+            print('NO finish')
+            time.sleep(60)
