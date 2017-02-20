@@ -37,6 +37,20 @@ def save_hs300s_to_csv(path, dt):
         df.to_csv(path)
 
 
+def save_one_tick_to_csv(code, path, dt):
+    print(time.strftime("%Y-%m-%d %H:%M:%S"))
+    print(code)
+    data = get_one_stock_tick(code, dt)
+    if not data.empty and not data.iloc[0][0] == 'alert("当天没有数据");':
+        data.to_csv(path + '/' + code + '.csv',
+                    index=False)
+        return True
+    else:
+        print('NO DATA')
+        print(data)
+        return False
+        
+
 def save_hs300s_tick_to_csv(path, dt):
     list = open(path + '/list', 'w')
     hs300s = read_hs300s(path + '/../hs300s.csv')
