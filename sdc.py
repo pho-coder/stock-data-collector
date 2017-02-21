@@ -44,10 +44,4 @@ if __name__ == '__main__':
             break
         else:
             hs300_count = len(hs300_list)
-        time.sleep(10)
-        # save_hs300s_tick_to_csv(today_path, dt)
-        # if os.path.isfile(today_path + '/finish'):
-        #     break
-        # else:
-        #     print('NO finish')
-        #     time.sleep(60)
+        time.sleep(60)
