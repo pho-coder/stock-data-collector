@@ -11,7 +11,7 @@ if __name__ == '__main__':
     manual = True if len(argv) >= 4 else False
     print(data_path, dt, manual)
     if not os.path.exists(data_path + '/hs300s.csv'):
-        print(data_path + 'hs300s.csv NOT exists!')
+        print(data_path + '/hs300s.csv NOT exists!')
         sys.exit(1)
     today_data_path = data_path + '/' + dt
     today_data_hs300 = today_data_path + '/hs300.csv'
