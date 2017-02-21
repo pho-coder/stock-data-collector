@@ -33,7 +33,7 @@ if __name__ == '__main__':
         for one in hs300_list:
             if utils.save_one_tick_to_csv(one, today_data_path, dt):
                 hs300_list.remove(one)
-        if len(hs300_list) == hs300_count:
+        if len(hs300_list) == hs300_count and len(hs300_list) <= 20:
             print('NO download one more, left ' + str(hs300_count))
             left_list = open(today_data_path +'/left', 'w')
             for one in hs300_list:
