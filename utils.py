@@ -51,33 +51,40 @@ def save_one_tick_to_csv(code, path, dt):
         return False
         
 
-def save_hs300s_tick_to_csv(path, dt):
-    list = open(path + '/list', 'w')
-    hs300s = read_hs300s(path + '/../hs300s.csv')
-    for one_code in hs300s.code:
-        print(time.strftime("%Y-%m-%d %H:%M:%S"))
-        print(one_code)
-        data = get_one_stock_tick(one_code, dt)
-        if not data.empty and not data.iloc[0][0] == 'alert("当天没有数据");':
-            info = hs300s[hs300s.code == one_code]
-            if info.empty:
-                list.write(one_code + '\n')
-            else:
-                list.write(one_code + ',' +
-                           str(info.iloc[0]['weight']) + ',' +
-                           str(info.iloc[0]['name']) + '\n')
-            list.flush()
-            data.to_csv(path + '/' +
-                        one_code + '.csv',
-                        index=False)
-        else:
-            print('NO DATA')
-            print(data)
-    list.close()
-    with open(path + '/list', 'r') as f:
-        if f.readline() != '':
-            finish = open(path + '/finish', 'w')
+def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
+    today_data_hs300 = today_data_path + '/hs300.csv'
+    hs300s = read_hs300s(hs300s_file)
+    hs300s_codes = list(hs300s.code)
+    hs300_count = len(hs300s_codes)
+    finish_list = open(today_data_path + '/list', 'w')
+    while True:
+        if not manual:
+            if int(time.strftime('%H', time.localtime())) > 21:
+                break
+        if not os.path.exists(today_data_hs300):
+            print('download hs300')
+            save_hs300s_to_csv(today_data_hs300, dt)
+        for one_code in hs300s_codes:
+            if save_one_tick_to_csv(one_code, today_data_path, dt):
+                one_info = hs300s[hs300s.code == one_code]
+                finish_list.write(one_code + ',' +
+                                  str(one_info.iloc[0]['weight']) + ',' +
+                                  str(one_info.iloc[0]['name']) + '\n')
+                finish_list.flush()
+                hs300s_codes.remove(one_code)
+        if len(hs300s_codes) <= 20 and len(hs300s_codes) == hs300_count:
+            print('NO download one more, left ' + str(hs300_count))
+            left_list = open(today_data_path + '/left', 'w')
+            for one_code in hs300s_codes:
+                left_list.write(one_code + '\n')
+            left_list.close()
+            finish = open(today_data_path + '/finish', 'w')
             finish.close()
+            break
+        else:
+            hs300_count = len(hs300s_codes)
+        time.sleep(60)
+    finish_list.close()
 
 
 def save_hs300s_tick_to_mysql(tb, eg, dt):
