@@ -3,10 +3,4 @@ bin=`dirname $0`
 bin=`cd "$bin"; pwd`
 SDC_HOME=`cd "$bin"/..;pwd`
 echo $SDC_HOME
-DATA_PATH=$1
-echo $DATA_PATH
-DT=$2
-echo $DT
-MANUAL=$3
-echo $MANUAL
-python3 $SDC_HOME/sdc.py $DATA_PATH $DT $MANUAL
+python3 -u $SDC_HOME/sdc.py "$@"
