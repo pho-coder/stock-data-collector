@@ -2,6 +2,7 @@
 import sys
 import os
 import time
+from datetime import datetime, timedelta
 import shutil
 import tushare as ts
 import pandas as pd
@@ -37,19 +38,30 @@ def save_hs300s_to_csv(path, dt):
         df.to_csv(path)
 
 
-def save_one_tick_to_csv(code, path, dt):
+def save_one_tick_to_csv(code, f, dt):
     print(time.strftime("%Y-%m-%d %H:%M:%S"))
-    print(code)
+    print(code, dt)
     data = get_one_stock_tick(code, dt)
     if not data.empty and not data.iloc[0][0] == 'alert("当天没有数据");':
-        data.to_csv(path + '/' + code + '.csv',
-                    index=False)
+        data.to_csv(f, index=False)
         return True
     else:
         print('NO DATA')
         print(data)
         return False
-        
+
+
+def save_one_tick_some_days_to_csv(code, code_data_path, start_dt, end_dt):
+    one_day = timedelta(days=1)
+    one_date = datetime.strptime(start_dt, '%Y-%m-%d')
+    end_date = datetime.strptime(end_dt, '%Y-%m-%d')
+    while True:
+        if one_date > end_date:
+            break
+        one_dt = one_date.strftime('%Y-%m-%d')
+        save_one_tick_to_csv(code, code_data_path + '/' + one_dt + '.csv', one_dt)
+        one_date = one_date + one_day
+
 
 def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
     today_data_hs300 = today_data_path + '/hs300.csv'
@@ -65,7 +77,7 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
             print('download hs300')
             save_hs300s_to_csv(today_data_hs300, dt)
         for one_code in hs300s_codes:
-            if save_one_tick_to_csv(one_code, today_data_path, dt):
+            if save_one_tick_to_csv(one_code, today_data_path + '/' + code + '.csv', dt):
                 one_info = hs300s[hs300s.code == one_code]
                 finish_list.write(one_code + ',' +
                                   str(one_info.iloc[0]['weight']) + ',' +
