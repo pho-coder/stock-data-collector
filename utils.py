@@ -77,7 +77,7 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
             print('download hs300')
             save_hs300s_to_csv(today_data_hs300, dt)
         for one_code in hs300s_codes:
-            if save_one_tick_to_csv(one_code, today_data_path + '/' + code + '.csv', dt):
+            if save_one_tick_to_csv(one_code, today_data_path + '/' + one_code + '.csv', dt):
                 one_info = hs300s[hs300s.code == one_code]
                 finish_list.write(one_code + ',' +
                                   str(one_info.iloc[0]['weight']) + ',' +
