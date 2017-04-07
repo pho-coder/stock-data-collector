@@ -10,7 +10,8 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--manual', help='manual or not; default False', action='store_true')
     parser.add_argument('-dp', '--data_path', help='data path')
     parser.add_argument('-d', '--dt', help='date, default today', default=time.strftime('%Y-%m-%d'))
-    parser.add_argument('-t', '--tp', help='type: hs300s, one; default hs300s', default='hs300s')
+    parser.add_argument('-t', '--tp', help='type: hs300s, one, today; default hs300s\n' +
+                        'sdc -t today -dp $STOCK_DATA_PATH -c 000002', default='hs300s')
     parser.add_argument('-sd', '--start_dt', help='one stock start date, default two weeks before', default=time.strftime('%Y-%m-%d', time.localtime(time.time() - 24*60*60*14)))
     parser.add_argument('-ed', '--end_dt', help='one stock end date, default one day before', default=time.strftime('%Y-%m-%d', time.localtime(time.time() - 24*60*60*1)))
     parser.add_argument('-c', '--code', help='one stock code')
@@ -58,3 +59,14 @@ if __name__ == '__main__':
         else:
             os.mkdir(code_data_path)
         utils.save_one_tick_some_days_to_csv(code, code_data_path, start_dt, end_dt)
+    elif tp == 'today':
+        code = args.code
+        print(data_path, code)
+        if data_path is None or code is None:
+            print('data path or code is None')
+            sys.exit(1)
+        if not os.path.exists(data_path):
+            print(data_path + ' NOT EXISTS!')
+            sys.exit(1)
+        code_data_today = data_path + '/' + code + '.' + time.strftime('%Y-%m-%d')
+        utils.save_one_tick_today(code, code_data_today)

@@ -28,6 +28,10 @@ def get_one_stock_tick(cd, dt):
                             pause=0.1).assign(code=cd).assign(date=dt)
 
 
+def get_one_stock_today(cd):
+    return ts.get_today_ticks(cd)
+
+
 def get_hs300_history_data(start_dt, end_dt):
     ts.get_hist_data('hs300', start=start_dt, end=end_dt)
 
@@ -97,6 +101,51 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
             hs300_count = len(hs300s_codes)
         time.sleep(60)
     finish_list.close()
+
+
+def compare_one_trans(one, other):
+    if one.time == other.time and \
+       one.price == other.time and \
+       one.pchange == other.pchange and \
+       one.change == other.change and \
+       one.volume == other.volume and \
+       one.amount == other.amount and \
+       one.type == other.type:
+        return True
+    else:
+        return False
+    
+
+def find_one_trans(data, one):
+    return_code = -1
+    for i in range(len(data)):
+        if compare_one_trans(data.iloc[i], one):
+            return_code = i
+            break
+    return return_code
+
+    
+def save_one_tick_today(code, code_data_today):
+    print(code, code_data_today)
+    data = get_one_stock_today(code)
+    if data is None:
+        print(code 'is None')
+        sys.exit(1)
+    data.iloc[::-1].to_csv(code_data_today, index=False, header=True)
+    newest_data = data.head(1)
+    while True:
+        time.sleep(3)
+        if int(time.strftime('%H', time.localtime())) >= 15:
+            print('time is over')
+            sys.exit(1)
+        data = get_one_stock_today(code)
+        index = find_one_trans(data, newest_data)
+        if index == 0:
+            continue
+        else:
+            new_data = data[:index]
+            print('get new lines:' + str(len(new_data)))
+            new_data.iloc[::-1].to_csv(code_data_today, index=False, header=False)
 
 
 def save_hs300s_tick_to_mysql(tb, eg, dt):
