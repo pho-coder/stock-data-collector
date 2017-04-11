@@ -105,7 +105,7 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
 
 def compare_one_trans(one, other):
     if one.time == other.time and \
-       one.price == other.time and \
+       one.price == other.price and \
        one.pchange == other.pchange and \
        one.change == other.change and \
        one.volume == other.volume and \
@@ -129,10 +129,10 @@ def save_one_tick_today(code, code_data_today):
     print(code, code_data_today)
     data = get_one_stock_today(code)
     if data is None:
-        print(code 'is None')
+        print(code + 'is None')
         sys.exit(1)
     data.iloc[::-1].to_csv(code_data_today, index=False, header=True)
-    newest_data = data.head(1)
+    newest_data = data.head(1).iloc[0]
     while True:
         time.sleep(3)
         if int(time.strftime('%H', time.localtime())) >= 15:
@@ -145,7 +145,8 @@ def save_one_tick_today(code, code_data_today):
         else:
             new_data = data[:index]
             print('get new lines:' + str(len(new_data)))
-            new_data.iloc[::-1].to_csv(code_data_today, index=False, header=False)
+            new_data.iloc[::-1].to_csv(code_data_today, index=False, header=False, mode='a')
+            newest_data = new_data.head(1).iloc[0]
 
 
 def save_hs300s_tick_to_mysql(tb, eg, dt):
