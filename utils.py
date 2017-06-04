@@ -59,6 +59,8 @@ def save_one_tick_to_csv(code, f, dt):
     else:
         print('NO DATA')
         print(data)
+        if data is not None and data.empty:
+            time.sleep(8)
         return False
 
 
@@ -106,7 +108,7 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
             break
         else:
             hs300_count = len(hs300s_codes)
-            print('NOW downloaded ' + str(hs300_count))
+            print('NOW left download ' + str(hs300_count))
         time.sleep(60)
     finish_list.close()
 
