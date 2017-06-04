@@ -21,15 +21,22 @@ def read_hs300s(file):
                                     'weight': np.str})
 
 
-def get_one_stock_tick(cd, dt):
-    return ts.get_tick_data(cd,
-                            date=dt,
-                            retry_count=600,
-                            pause=0.1).assign(code=cd).assign(date=dt)
-
-
-def get_one_stock_today(cd):
-    return ts.get_today_ticks(cd)
+def get_one_stock_tick(cd, dt, sleep_time=1):
+    try:
+        data = ts.get_tick_data(cd,
+                                date=dt,
+                                retry_count=3,
+                                pause=0.1,
+                                src='tt')
+        if data is not None:
+            return data.assign(code=cd).assign(date=dt)
+        else:
+            return None
+    except IOError as e:
+        print(e)
+        print(cd + " sleep time: " + str(sleep_time))
+        time.sleep(sleep_time)
+        return get_one_stock_tick(cd, dt, sleep_time * 2)
 
 
 def get_hs300_history_data(start_dt, end_dt):
@@ -46,7 +53,7 @@ def save_one_tick_to_csv(code, f, dt):
     print(time.strftime("%Y-%m-%d %H:%M:%S"))
     print(code, dt)
     data = get_one_stock_tick(code, dt)
-    if not data.empty and not data.iloc[0][0] == 'alert("当天没有数据");':
+    if data is not None and (not data.empty and not data.iloc[0][0] == 'alert("当天没有数据");'):
         data.to_csv(f, index=False)
         return True
     else:
@@ -77,9 +84,9 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
         if not manual:
             if int(time.strftime('%H', time.localtime())) > 21:
                 break
-        if not os.path.exists(today_data_hs300):
-            print('download hs300')
-            save_hs300s_to_csv(today_data_hs300, dt)
+#        if not os.path.exists(today_data_hs300):
+#            print('download hs300')
+#            save_hs300s_to_csv(today_data_hs300, dt)
         for one_code in hs300s_codes:
             if save_one_tick_to_csv(one_code, today_data_path + '/' + one_code + '.csv', dt):
                 one_info = hs300s[hs300s.code == one_code]
@@ -88,7 +95,7 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
                                   str(one_info.iloc[0]['name']) + '\n')
                 finish_list.flush()
                 hs300s_codes.remove(one_code)
-        if len(hs300s_codes) <= 20 and len(hs300s_codes) == hs300_count:
+        if len(hs300s_codes) <= 30 and len(hs300s_codes) == hs300_count:
             print('NO download one more, left ' + str(hs300_count))
             left_list = open(today_data_path + '/left', 'w')
             for one_code in hs300s_codes:
@@ -99,54 +106,9 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
             break
         else:
             hs300_count = len(hs300s_codes)
+            print('NOW downloaded ' + str(hs300_count))
         time.sleep(60)
     finish_list.close()
-
-
-def compare_one_trans(one, other):
-    if one.time == other.time and \
-       one.price == other.price and \
-       one.pchange == other.pchange and \
-       one.change == other.change and \
-       one.volume == other.volume and \
-       one.amount == other.amount and \
-       one.type == other.type:
-        return True
-    else:
-        return False
-    
-
-def find_one_trans(data, one):
-    return_code = -1
-    for i in range(len(data)):
-        if compare_one_trans(data.iloc[i], one):
-            return_code = i
-            break
-    return return_code
-
-    
-def save_one_tick_today(code, code_data_today):
-    print(code, code_data_today)
-    data = get_one_stock_today(code)
-    if data is None:
-        print(code + 'is None')
-        sys.exit(1)
-    data.iloc[::-1].to_csv(code_data_today, index=False, header=True)
-    newest_data = data.head(1).iloc[0]
-    while True:
-        time.sleep(3)
-        if int(time.strftime('%H', time.localtime())) >= 15:
-            print('time is over')
-            sys.exit(1)
-        data = get_one_stock_today(code)
-        index = find_one_trans(data, newest_data)
-        if index == 0:
-            continue
-        else:
-            new_data = data[:index]
-            print('get new lines:' + str(len(new_data)))
-            new_data.iloc[::-1].to_csv(code_data_today, index=False, header=False, mode='a')
-            newest_data = new_data.head(1).iloc[0]
 
 
 def save_hs300s_tick_to_mysql(tb, eg, dt):
@@ -169,7 +131,7 @@ if __name__ == '__main__':
     today_hs300 = path + '/SH000300.' + dt
     while True:
         if not manual:
-            if int(time.strftime('%H', time.localtime())) > 20:
+            if int(time.strftime('%H', time.localtime())) > 22:
                 break
         if not os.path.exists(today_hs300):
             print('download hs300')
