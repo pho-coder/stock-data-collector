@@ -59,8 +59,6 @@ def save_one_tick_to_csv(code, f, dt):
     else:
         print('NO DATA')
         print(data)
-        if data is not None and data.empty:
-            time.sleep(8)
         return False
 
 
@@ -89,7 +87,8 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
 #        if not os.path.exists(today_data_hs300):
 #            print('download hs300')
 #            save_hs300s_to_csv(today_data_hs300, dt)
-        for one_code in hs300s_codes:
+        tmp_hs300s_codes = hs300s_codes[:]
+        for one_code in tmp_hs300s_codes:
             if save_one_tick_to_csv(one_code, today_data_path + '/' + one_code + '.csv', dt):
                 one_info = hs300s[hs300s.code == one_code]
                 finish_list.write(one_code + ',' +
@@ -97,6 +96,9 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
                                   str(one_info.iloc[0]['name']) + '\n')
                 finish_list.flush()
                 hs300s_codes.remove(one_code)
+            else:
+                print('download ' + one_code + ' ERROR!')
+            print('left codes: ' + str(len(hs300s_codes)))
         if len(hs300s_codes) <= 30 and len(hs300s_codes) == hs300_count:
             print('NO download one more, left ' + str(hs300_count))
             left_list = open(today_data_path + '/left', 'w')
