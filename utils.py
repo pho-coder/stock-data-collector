@@ -84,9 +84,9 @@ def save_hs300s_ticks_to_csv(today_data_path, dt, hs300s_file, manual):
         if not manual:
             if int(time.strftime('%H', time.localtime())) > 21:
                 break
-#        if not os.path.exists(today_data_hs300):
-#            print('download hs300')
-#            save_hs300s_to_csv(today_data_hs300, dt)
+        if not os.path.exists(today_data_hs300):
+            print('download hs300')
+            save_hs300s_to_csv(today_data_hs300, dt)
         tmp_hs300s_codes = hs300s_codes[:]
         for one_code in tmp_hs300s_codes:
             if save_one_tick_to_csv(one_code, today_data_path + '/' + one_code + '.csv', dt):
